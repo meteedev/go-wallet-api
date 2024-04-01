@@ -9,7 +9,7 @@ jobs:
       matrix:
         go-version: ['1.21.8', '1.22.1']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.20
       - name: Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v4
         with:
@@ -27,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.20
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v4.20
         with:
           go-version: ${{ matrix.go-version }}
       - name: Install dependencies
