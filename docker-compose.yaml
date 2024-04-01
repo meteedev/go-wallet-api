@@ -1,0 +1,46 @@
+version: '3.2'
+
+networks:
+  wallet-net:
+
+services:
+  wallet-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1323:1323"
+    environment:
+      POSTGRES_HOST:  wallet-db
+      POSTGRES_PORT:  5432
+      POSTGRES_USER:  root
+      POSTGRES_PASSWORD:  password
+      POSTGRES_DB_NAME: wallet
+      POSTGRES_SSL_MODE:  disable
+    depends_on:
+      wallet-db:
+        condition: service_healthy
+    networks:
+      - wallet-net
+
+  wallet-db:
+    image: postgres:16.0
+    environment:
+      POSTGRES_DB: wallet
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    volumes:
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+        - "5432:5432"
+    networks:
+      - wallet-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d wallet"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+    pgdata:
