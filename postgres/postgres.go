@@ -20,7 +20,7 @@ type DbConfiguration struct {
 
 func New() (*Postgres, error) {
 	databaseSource := generateDatabaseUrl()
-	//log.Println(databaseSource)
+	log.Println(databaseSource)
 	db, err := sql.Open("postgres", databaseSource)
 	if err != nil {
 		log.Fatal(err)
