@@ -23,6 +23,20 @@ jobs:
       - name: Run go vet (static analysis)
         run: go vet ./...
 
+  Env-Db-Test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Install dependencies
+        run: go mod download
+      - name: Run tests
+        run: go test -v ./postgres/
+
   Unit-Test:
     runs-on: ubuntu-latest
     needs: build
