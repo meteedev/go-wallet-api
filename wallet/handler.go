@@ -1,7 +1,6 @@
 package wallet
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -102,12 +101,6 @@ func (h *Handler) CreateWalletHandler(c echo.Context) error {
 		return err
 	}
 
-	// Validate the request
-	if err := c.Validate(req); err != nil {
-		log.Println(err.Error())
-		return apperrs.NewBadRequestError(err.Error())
-	}
-
 	wallet, err := h.service.CreateWallet(req)
 
 	if err != nil {
@@ -162,7 +155,6 @@ func (h *Handler) DeleteWalletHandler(c echo.Context) error {
 // @Failure 400 {object} apperrs.CustomError
 func (h *Handler) UpdateWalletHandler(c echo.Context) error {
 
-
 	walletId , err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -173,12 +165,6 @@ func (h *Handler) UpdateWalletHandler(c echo.Context) error {
 	req := new(WalletRequest)
 	if err := c.Bind(req); err != nil {
 		return err
-	}
-
-	// Validate the request
-	if err := c.Validate(req); err != nil {
-		log.Println(err.Error())
-		return apperrs.NewBadRequestError(err.Error())
 	}
 
 	walletResponse, err := h.service.UpdateWalletByWalletId(walletId, req)

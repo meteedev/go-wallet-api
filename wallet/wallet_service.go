@@ -193,6 +193,14 @@ func (ws WalletService) DeleteWalletByUserId(userId string)(int64,error){
 
 func (ws WalletService) UpdateWalletByWalletId(walletId int,request *WalletRequest) (*Wallet,error){
 	
+	err := ValidateWalletRequest(request)
+
+	if err != nil{
+		log.Println(err)
+		return nil,apperrs.NewBadRequestError(err.Error())
+	}
+	
+	
 	wallet := postgres.Wallet{
 		UserID:     request.UserID,
 		UserName:   request.UserName,
