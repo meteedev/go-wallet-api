@@ -1,4 +1,4 @@
-name: Go Wallet API CI
+name: Go CI
 
 on: [push]
 
@@ -20,7 +20,9 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+
       - name: Run static code analysis
         run: |
-          go get -u golang.org/x/lint/golint
           golint ./...
