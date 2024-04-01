@@ -1,10 +1,10 @@
 package wallet
 
-import( 
+import (
 	"log"
 
-	"github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
+	"github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
 )
 
 type WalletService struct {
@@ -108,6 +108,14 @@ func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error){
 
 func (ws WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 	
+	
+	err := ValidateWalletRequest(request)
+
+	if err != nil{
+		log.Println(err)
+		return nil,apperrs.NewBadRequestError(err.Error())
+	}
+
 	wallet := postgres.Wallet{
 		UserID:     request.UserID,
 		UserName:   request.UserName,
@@ -213,8 +221,6 @@ func (ws WalletService) UpdateWalletByWalletId(walletId int,request *WalletReque
 		return nil,apperrs.NewInternalServerError("Update wallet failed")
 	}
 
-
-
 	walletResponses := Wallet{
 		ID:         w.ID,
 		UserID:     w.UserID,
@@ -227,3 +233,5 @@ func (ws WalletService) UpdateWalletByWalletId(walletId int,request *WalletReque
 
 	return &walletResponses,nil
 }
+
+

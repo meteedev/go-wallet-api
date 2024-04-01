@@ -4,10 +4,8 @@ import (
 	
 	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
-	appvalidate "github.com/KKGo-Software-engineering/fun-exercise-api/validate"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
 	"github.com/labstack/echo/v4"
-	"github.com/go-playground/validator/v10"
 
 	_ "github.com/KKGo-Software-engineering/fun-exercise-api/docs"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -31,8 +29,6 @@ func main() {
 
 	e.Use(apperrs.CustomErrorMiddleware)
 	
-	e.Validator = &appvalidate.CustomValidator{Validator: validator.New()}
-
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	
 	e.GET("/api/v1/wallets", handler.WalletHandler)
