@@ -67,6 +67,14 @@
 				
 				<option value="file5">github.com/KKGo-Software-engineering/fun-exercise-api/postgres/wallet.go (0.0%)</option>
 				
+				<option value="file6">github.com/KKGo-Software-engineering/fun-exercise-api/wallet/handler.go (73.2%)</option>
+				
+				<option value="file7">github.com/KKGo-Software-engineering/fun-exercise-api/wallet/wallet_service.go (63.6%)</option>
+				
+				<option value="file8">github.com/KKGo-Software-engineering/fun-exercise-api/wallet/wallet_service_mock.go (76.9%)</option>
+				
+				<option value="file9">github.com/KKGo-Software-engineering/fun-exercise-api/wallet/wallet_validate_manual.go (77.8%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -735,169 +743,674 @@ func (p *Postgres) Create(w *Wallet) (*Wallet, error) <span class="cov0" title="
         <span class="cov0" title="0">return w, err</span>
 }
 
-// func (p *Postgres) CountWalletsByCriteria(criteria *Wallet) (int, error) {
-//     query := "SELECT count(id) FROM wallets WHERE "
-//     var conditions []string
-//     var args []interface{}
 
-//     // Iterate over struct fields
-//     v := reflect.ValueOf(criteria)
-//     for i := 0; i &lt; v.NumField(); i++ {
-//         fieldName := v.Type().Field(i).Tag.Get("postgres") // Get the tag value from struct definition
-//         fieldValue := v.Field(i).Interface()               // Get the field value
-//         if fieldValue != reflect.Zero(v.Field(i).Type()).Interface() {
-//             conditions = append(conditions, fmt.Sprintf("%s = $%d", fieldName, len(args)+1))
-//             args = append(args, fieldValue)
-//         }
-//     }
-
-//     query += strings.Join(conditions, " AND ")
-
-//     rows, err := p.Db.Query(query, args...)
-//     if err != nil {
-//         return nil, err
-//     }
-//     defer rows.Close()
-
-//     var wallets []Wallet
-//     for rows.Next() {
-//         var wallet Wallet
-//         err := rows.Scan(&amp;wallet.ID, &amp;wallet.UserID, &amp;wallet.UserName, &amp;wallet.WalletName, &amp;wallet.WalletType, &amp;wallet.Balance, &amp;wallet.CreatedAt)
-//         if err != nil {
-//             return nil, fmt.Errorf("error scanning wallet row: %v", err)
-//         }
-//         wallets = append(wallets, wallet)
-//     }
-//     if err := rows.Err(); err != nil {
-//         return nil, fmt.Errorf("error iterating over wallet rows: %v", err)
-//     }
-
-//     return wallets, nil
-// }
-
-func (p *Postgres) CountByCriteria(criteria Wallet) (int, error) <span class="cov0" title="0">{
+func (p *Postgres) CountByCriteria(criteria Wallet) (int, error) {
         query := "SELECT count(id) FROM user_wallet WHERE "
         var args []interface{}
 
         // Iterate over struct fields
         var sb strings.Builder
         v := reflect.ValueOf(criteria)
-        for i := 0; i &lt; v.NumField(); i++ </span><span class="cov0" title="0">{
+        for i := 0; i &lt; v.NumField(); i++ {
                 fieldName := v.Type().Field(i).Tag.Get("postgres") // Get the tag value from struct definition
                 fieldValue := v.Field(i).Interface()               // Get the field value
-                if fieldValue != reflect.Zero(v.Field(i).Type()).Interface() </span><span class="cov0" title="0">{
-                        if sb.Len() &gt; 0 </span><span class="cov0" title="0">{
+                if fieldValue != reflect.Zero(v.Field(i).Type()).Interface() {
+                        if sb.Len() &gt; 0 {
                                 sb.WriteString(" AND ") // Add AND if there are multiple conditions
-                        }</span>
-                        <span class="cov0" title="0">sb.WriteString(fmt.Sprintf("%s = $%d", fieldName, len(args)+1))
-                        args = append(args, fieldValue)</span>
+                        }
+                        sb.WriteString(fmt.Sprintf("%s = $%d", fieldName, len(args)+1))
+                        args = append(args, fieldValue)
                 }
         }
 
-        <span class="cov0" title="0">query += sb.String()
+        query += sb.String()
 
         row := p.Db.QueryRow(query, args...)
 
         var count int
         err := row.Scan(&amp;count)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil {
                 return 0, err
-        }</span>
+        }
 
-        <span class="cov0" title="0">return count, nil</span>
+        return count, nil
 
 }
 
-func (p *Postgres) DeleteByUserId(userId string) (int64, error) <span class="cov0" title="0">{
+func (p *Postgres) DeleteByUserId(userId string) (int64, error) {
 
         sql := "DELETE FROM user_wallet WHERE user_id= $1"
         res, err := p.Db.Exec(sql, userId)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil {
                 return 0, err
-        }</span>
+        }
 
-        <span class="cov0" title="0">deletedRows, err := res.RowsAffected()
+        deletedRows, err := res.RowsAffected()
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil {
                 return 0, err
-        }</span>
-
-        <span class="cov0" title="0">return deletedRows, nil</span>
+        }
+</span>
+        return deletedRows, nil
 }
-
-
-func (p *Postgres) FindByWalletId(walletID int) (*Wallet, error) <span class="cov0" title="0">{
-    // Prepare the SQL query with a placeholder for the wallet ID
+</span>
+</span>
+func</span> (p *Postgres) FindByWalletId(walletID int) (*Wallet, error) {
+   <span class="cov0" title="0"> // Prepare the SQL query with a placeholder for the wallet ID
     query := `
-        SELECT id, user_id, user_name, wallet_name, wallet_type, balance, created_at 
+</span>        SELECT id, user_id, user_name, wallet_name, wallet_type, balance, created_at 
         FROM user_wallet 
         WHERE id = $1 
-        LIMIT 1
+ <span class="cov0" title="0">       LIMIT 1
     `
 
     // Execute the query using the QueryRow method of the DB object
     row := p.Db.QueryRow(query, walletID)
 
-    // Initialize a Wallet struct
+    // Initiali</span><span class="cov0" title="0">ze a Wallet struct
     var wallet Wallet
 
-    // Scan the values returned by the query into the fields of the wallet struct
-    err := row.Scan(&amp;wallet.ID, &amp;wallet.UserID, &amp;wallet.UserName, &amp;wallet.WalletName, &amp;wallet.WalletType, &amp;wallet.Balance, &amp;wallet.CreatedAt)
-    if err != nil </span><span class="cov0" title="0">{
+</span>    // Scan the values returned by the query into the fields of the wallet struct
+ <span class="cov0" title="0">   err := row.Sca</span>n(&amp;wallet.ID, &amp;wallet.UserID, &amp;wallet.UserName, &amp;wallet.WalletName, &amp;wallet.WalletType, &amp;wallet.Balance, &amp;wallet.CreatedAt)
+    if err != nil {
         // If no rows are returned, check for sql.ErrNoRows error
-        if err == sql.ErrNoRows </span><span class="cov0" title="0">{
-            return nil, fmt.Errorf("wallet not found for ID: %d", walletID)
-        }</span>
+        if err == sql.ErrNoRows {
+            return nil, fmt.Errorf("wallet not found for ID: %d"<span class="cov0" title="0">, walletID)
+        }
         // Otherwise, return any other error
-        <span class="cov0" title="0">return nil, err</span>
+        return nil, err
     }
 
-    // Return the populated wallet pointer
-    <span class="cov0" title="0">return &amp;wallet, nil</span>
+</span>    // Return the populated wallet pointer
+  </span>  return &amp;wallet, nil
 }
-
-func (p *Postgres) UpdateByWalletId(walletId int, wallet Wallet) (int64, error) <span class="cov0" title="0">{
-    var updates []string
+<span class="cov0" title="0">
+func (p *Postgres) UpdateByWalletId(walletId int, wallet Wallet) (int64, error) {
+    var updates</span><span class="cov0" title="0"> []string
     var args []interface{}
 
-    val := reflect.ValueOf(wallet)
-    typ := reflect.TypeOf(wallet)
+</span>    val := reflect.ValueOf(wallet)
+ <span class="cov0" title="0">   typ := reflect.TypeO</span>f(wallet)
 
-    for i := 0; i &lt; val.NumField(); i++ </span><span class="cov0" title="0">{
+    for i := 0; i &lt; val.NumField(); i++ {
         field := val.Field(i)
         tag := typ.Field(i).Tag.Get("postgres")
 
-        if field.IsZero() || !field.CanInterface() </span><span class="cov0" title="0">{
-            continue</span>
+        if field.IsZero() || !field.CanInterface() {
+            continue
         }
 
-        <span class="cov0" title="0">updates = append(updates, fmt.Sprintf("%s = $%d", tag, len(args)+1))
-        args = append(args, field.Interface())</span>
+        updates = append(updates, fmt.Sprintf("%s = $%d", tag, len(args)+1))
+        args = append(args, field.Interface())
     }
 
     // Check if any updates are provided
-    <span class="cov0" title="0">if len(updates) == 0 </span><span class="cov0" title="0">{
+    if len(updates) == 0 {
         return 0, fmt.Errorf("no updates provided")
-    }</span>
+    }
 
     // Construct the query string
-    <span class="cov0" title="0">query := fmt.Sprintf("UPDATE user_wallet SET %s WHERE id = $%d", strings.Join(updates, ", "), len(args)+1)
-    args = append(args, walletId)
+    query := fmt.Sprintf("UPDATE user_wallet SET %s WHERE id = $%d", strings.Join(updates, ", "), len(args)+1)
+    args = append(</span><span class="cov0" title="0">args, walletId)
 
     // Execute the query
-    res, err := p.Db.Exec(query, args...)
-    if err != nil </span><span class="cov0" title="0">{
+</span>    res, err := p.Db.Exec(query, args...)
+    if er</span>r != nil {
         return 0, err
-    }</span>
-
+    }
+</span>
     // Get the number of rows affected
-    <span class="cov0" title="0">numRows, err := res.RowsAffected()
-    if err != nil </span><span class="cov0" title="0">{
-        return 0, err
+    numRows, err := res.RowsAffected()
+    <span class="cov0" title="0">if err != nil {
+</span>        return 0, err
+    }
+
+    return numRows, nil
+}</pre>
+		
+		<pre class="file" id="file6" style="display: none">package wallet
+
+import (
+        "net/http"
+        "strconv"
+
+        "github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
+        "github.com/labstack/echo/v4"
+)
+
+type Handler struct {
+        service Service
+}
+
+func NewHandler(service Service) *Handler <span class="cov8" title="1">{
+        return &amp;Handler{service: service}
+}</span>
+
+type Err struct {
+        Message string `json:"message"`
+}
+
+// WalletHandler
+//
+//        @Summary                Get all wallets
+//        @Description        Get all wallets
+//        @Tags                        wallet
+//        @Accept                        json
+//        @Produce                json
+//        @Success                200        {object}        Wallet
+//        @Router                        /api/v1/wallets [get]
+//        @Failure                500        {object}        Err
+func (h *Handler) WalletHandler(c echo.Context) error <span class="cov8" title="1">{
+
+        walletType := c.QueryParam("wallet_type")
+
+        var wallets []Wallet
+        var err error
+
+        if walletType != "" </span><span class="cov0" title="0">{
+                wallets, err = h.service.GetWalletsByWalletType(walletType)
+        }</span> else<span class="cov8" title="1"> {
+                wallets, err = h.service.GetAllWallets()
+        }</span>
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, wallets)</span>
+
+}
+
+
+
+// UserHandler
+//        @Summary                Get user wallets
+//        @Description        Get user wallets
+//        @Tags                        wallet
+//        @Accept                        json
+//        @Produce                json
+//        @Success                200        {object}        Wallet
+//        @Router                        /api/v1/users/{id}/wallets [get]
+//        @Param                        id        path        string        true        "user id"
+//        @Failure                500        {object}        apperrs.CustomError
+//        @Failure                400        {object}        apperrs.CustomError
+func (h *Handler) WalletByUserIdHandler(c echo.Context) error <span class="cov8" title="1">{
+        userId , err := strconv.Atoi(c.Param("id"))
+
+        if err != nil </span><span class="cov0" title="0">{
+        return apperrs.NewBadRequestError("invalid user ID")
     }</span>
 
-    <span class="cov0" title="0">return numRows, nil</span>
+        <span class="cov8" title="1">wallets, err := h.service.GetWalletsByUserId(userId)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, wallets)</span>
+
+}
+
+
+
+// CreateWallet
+// @Summary Create user wallets
+// @Description Create user wallets
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Param WalletCreateRequest body WalletRequest true "WalletRequest"
+// @Success 201 {object} Wallet
+// @Router /api/v1/wallets/ [post]
+// @Failure 500 {object} apperrs.CustomError
+// @Failure 400 {object} apperrs.CustomError
+func (h *Handler) CreateWalletHandler(c echo.Context) error <span class="cov8" title="1">{
+
+        req := new(WalletRequest)
+        if err := c.Bind(req); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">wallet, err := h.service.CreateWallet(req)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(http.StatusCreated, wallet)</span>
+}
+
+
+// DeleteWallet
+// @Summary Delete user wallets
+// @Description Delete user wallets by user id
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Router        /api/v1/users/{id}/wallets [delete]
+// @Param        id        path        string        true        "user id"
+// @Success 200 {object} Wallet
+// @Failure 500 {object} apperrs.CustomError
+// @Failure 400 {object} apperrs.CustomError
+func (h *Handler) DeleteWalletHandler(c echo.Context) error <span class="cov8" title="1">{
+
+        userId := c.Param("id")
+
+        if len(userId) == 0 </span><span class="cov0" title="0">{
+                return apperrs.NewBadRequestError("user id required")
+        }</span>
+
+        <span class="cov8" title="1">rowAffected, err := h.service.DeleteWalletByUserId(userId)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, rowAffected)</span>
+
+}
+
+
+// UpdateWallet
+// @Summary Update user wallets
+// @Description Update user wallets by wallet id
+// @Tags wallet
+// @Accept json
+// @Produce json
+// @Router /api/v1/wallets/{id} [put]
+// @Param        id        path        string        true        "wallet id"
+// @Param WalletCreateRequest body WalletRequest true "WalletRequest"
+// @Success 200 {object} Wallet
+// @Failure 500 {object} apperrs.CustomError
+// @Failure 400 {object} apperrs.CustomError
+func (h *Handler) UpdateWalletHandler(c echo.Context) error <span class="cov8" title="1">{
+
+        walletId , err := strconv.Atoi(c.Param("id"))
+
+        if err != nil </span><span class="cov0" title="0">{
+        return apperrs.NewBadRequestError("invalid wallet ID")
+    }</span>
+
+
+        <span class="cov8" title="1">req := new(WalletRequest)
+        if err := c.Bind(req); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">walletResponse, err := h.service.UpdateWalletByWalletId(walletId, req)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, walletResponse)</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package wallet
+
+import (
+        "log"
+
+        "github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
+        "github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
+)
+
+type WalletService struct {
+        WalletStore postgres.Storer
+}
+
+
+func NewService(db postgres.Storer) WalletService <span class="cov0" title="0">{
+        return WalletService{WalletStore: db}
+}</span>
+
+func (s WalletService) GetAllWallets() ([]Wallet, error)<span class="cov8" title="1">{
+
+        wallets, err := s.WalletStore.FindAll()
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, apperrs.NewInternalServerError(err.Error())
+        }</span>
+
+        <span class="cov8" title="1">if len(wallets)==0</span><span class="cov0" title="0">{
+                return nil, apperrs.NewNotFoundError("wallet not found")
+        }</span>
+
+        <span class="cov8" title="1">var walletResponses []Wallet
+        for _, w := range wallets </span><span class="cov8" title="1">{
+                walletResponses = append(walletResponses, Wallet{
+                        ID:         w.ID,
+                        UserID:     w.UserID,
+                        UserName:   w.UserName,
+                        WalletName: w.WalletName,
+                        WalletType: w.WalletType,
+                        Balance:    w.Balance,
+                        CreatedAt:  w.CreatedAt,
+                })
+        }</span>
+
+        <span class="cov8" title="1">return walletResponses,nil</span>
+
+}
+
+
+func (s WalletService) GetWalletsByWalletType(walletType string) ([]Wallet, error)<span class="cov8" title="1">{
+
+        wallets, err := s.WalletStore.FindByWalletType(walletType)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, apperrs.NewInternalServerError(err.Error())
+        }</span>
+
+        <span class="cov8" title="1">if len(wallets)==0</span><span class="cov0" title="0">{
+                return nil, apperrs.NewNotFoundError("wallet not found")
+        }</span>
+
+        <span class="cov8" title="1">var walletResponses []Wallet
+        for _, w := range wallets </span><span class="cov8" title="1">{
+                walletResponses = append(walletResponses, Wallet{
+                        ID:         w.ID,
+                        UserID:     w.UserID,
+                        UserName:   w.UserName,
+                        WalletName: w.WalletName,
+                        WalletType: w.WalletType,
+                        Balance:    w.Balance,
+                        CreatedAt:  w.CreatedAt,
+                })
+        }</span>
+
+        <span class="cov8" title="1">return walletResponses,nil</span>
+
+}
+
+
+func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error)<span class="cov8" title="1">{
+
+        wallets, err := s.WalletStore.FindByUserId(userId)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, apperrs.NewInternalServerError(err.Error())
+        }</span>
+
+        <span class="cov8" title="1">if len(wallets)==0</span><span class="cov0" title="0">{
+                return nil, apperrs.NewNotFoundError("wallet not found")
+        }</span>
+
+        <span class="cov8" title="1">var walletResponses []Wallet
+        for _, w := range wallets </span><span class="cov8" title="1">{
+                walletResponses = append(walletResponses, Wallet{
+                        ID:         w.ID,
+                        UserID:     w.UserID,
+                        UserName:   w.UserName,
+                        WalletName: w.WalletName,
+                        WalletType: w.WalletType,
+                        Balance:    w.Balance,
+                        CreatedAt:  w.CreatedAt,
+                })
+        }</span>
+
+        <span class="cov8" title="1">return walletResponses,nil</span>
+
+}
+
+
+func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet,error)<span class="cov8" title="1">{
+        
+        
+        err := ValidateWalletRequest(request)
+
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return nil,apperrs.NewBadRequestError(err.Error())
+        }</span>
+
+        <span class="cov8" title="1">wallet := postgres.Wallet{
+                UserID:     request.UserID,
+                UserName:   request.UserName,
+                WalletName: request.WalletName,
+                WalletType: request.WalletType,
+                Balance:    request.Balance,
+        }
+
+        isDuplicated , err := s.CheckDuplicated(wallet)
+
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return nil,apperrs.NewInternalServerError(err.Error())
+        }</span>
+
+        <span class="cov8" title="1">if isDuplicated </span><span class="cov0" title="0">{
+                log.Printf("Duplicated wallet userid=%d userName=%s walletname=%s walletType=%s",wallet.UserID,wallet.UserName,wallet.WalletName,wallet.WalletType)
+                return nil,apperrs.NewInternalServerError("Duplicated wallets")
+        }</span>
+
+        
+        <span class="cov8" title="1">w , err := s.WalletStore.Create(&amp;wallet)
+        
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return nil,apperrs.NewInternalServerError("Create wallet failed")
+        }</span>
+
+        <span class="cov8" title="1">walletResponses := Wallet{
+                ID:         w.ID,
+                UserID:     w.UserID,
+                UserName:   w.UserName,
+                WalletName: w.WalletName,
+                WalletType: w.WalletType,
+                Balance:    w.Balance,
+                CreatedAt:  w.CreatedAt,
+        }
+
+
+        return &amp;walletResponses,nil</span>
+}
+
+func (s WalletService) CheckDuplicated(wallet postgres.Wallet) (bool,error)<span class="cov8" title="1">{
+        rowCount , err := s.WalletStore.CountByCriteria(wallet)
+        
+        if err!= nil</span><span class="cov0" title="0">{
+                return false,err
+        }</span>
+
+        <span class="cov8" title="1">isDup := rowCount &gt; 0
+
+        return isDup , nil</span>
+}
+
+
+
+func (s WalletService) DeleteWalletByUserId(userId string)(int64,error)<span class="cov8" title="1">{
+        
+        deleteRow , err := s.WalletStore.DeleteByUserId(userId)
+        
+
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return 0,apperrs.NewInternalServerError("Delete wallet failed")
+        }</span>
+        
+        <span class="cov8" title="1">if deleteRow == 0</span><span class="cov0" title="0">{
+                log.Println("delete affected ",deleteRow)
+                return 0,apperrs.NewUnprocessableEntity("Delete wallet failed")
+        }</span>
+
+        <span class="cov8" title="1">return deleteRow,nil</span>
+}
+
+
+func (s WalletService) UpdateWalletByWalletId(walletId int,request *WalletRequest) (*Wallet,error)<span class="cov8" title="1">{
+        
+        err := ValidateWalletRequest(request)
+
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return nil,apperrs.NewBadRequestError(err.Error())
+        }</span>
+        
+        
+        <span class="cov8" title="1">wallet := postgres.Wallet{
+                UserID:     request.UserID,
+                UserName:   request.UserName,
+                WalletName: request.WalletName,
+                WalletType: request.WalletType,
+                Balance:    request.Balance,
+        }
+
+        updateRow , err := s.WalletStore.UpdateByWalletId(walletId,wallet)
+        
+
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return nil,apperrs.NewInternalServerError("Update wallet failed")
+        }</span>
+        
+        <span class="cov8" title="1">if updateRow == 0</span><span class="cov0" title="0">{
+                log.Println("update affected ",updateRow)
+                return nil,apperrs.NewUnprocessableEntity("Delete wallet failed")
+        }</span>
+
+        <span class="cov8" title="1">w , err := s.WalletStore.FindByWalletId(walletId)
+
+        if err != nil</span><span class="cov0" title="0">{
+                log.Println(err)
+                return nil,apperrs.NewInternalServerError("Update wallet failed")
+        }</span>
+
+        <span class="cov8" title="1">walletResponses := Wallet{
+                ID:         w.ID,
+                UserID:     w.UserID,
+                UserName:   w.UserName,
+                WalletName: w.WalletName,
+                WalletType: w.WalletType,
+                Balance:    w.Balance,
+                CreatedAt:  w.CreatedAt,
+        }
+
+        return &amp;walletResponses,nil</span>
+}
+
+
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package wallet
+
+import (
+        "time"
+
+        "github.com/stretchr/testify/mock"
+)
+
+// MockService is a mock implementation of the Service interface
+type MockService struct {
+        mock.Mock
+}
+
+func (m *MockService) GetAllWallets() ([]Wallet, error) <span class="cov8" title="1">{
+        args := m.Called()
+        return args.Get(0).([]Wallet), args.Error(1)
+}</span>
+
+func (m *MockService) GetWalletsByWalletType(walletType string) ([]Wallet, error) <span class="cov0" title="0">{
+        args := m.Called(walletType)
+        return args.Get(0).([]Wallet), args.Error(1)
+}</span>
+
+func (m *MockService) GetWalletsByUserId(userId int) ([]Wallet, error) <span class="cov8" title="1">{
+        args := m.Called(userId)
+        return args.Get(0).([]Wallet), args.Error(1)
+}</span>
+
+func (m *MockService) CreateWallet(wallet *WalletRequest) (*Wallet, error) <span class="cov8" title="1">{
+        args := m.Called(wallet)
+        return args.Get(0).(*Wallet), args.Error(1)
+}</span>
+
+func (m *MockService) DeleteWalletByUserId(userId string) (int64, error) <span class="cov8" title="1">{
+        args := m.Called(userId)
+        return args.Get(0).(int64), args.Error(1)
+}</span>
+
+func (m *MockService) UpdateWalletByWalletId(walletId int, request *WalletRequest) (*Wallet, error) <span class="cov8" title="1">{
+        args := m.Called(walletId, request)
+        return args.Get(0).(*Wallet), args.Error(1)
+}</span>
+
+// Helper function to convert WalletRequest to Wallet
+func toWallet(request *WalletRequest) *Wallet <span class="cov0" title="0">{
+        return &amp;Wallet{
+                ID:         0,
+                UserID:     request.UserID,
+                UserName:   request.UserName,
+                WalletName: request.WalletName,
+                WalletType: request.WalletType,
+                Balance:    0,
+                CreatedAt:  time.Time{},
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package wallet
+
+import (
+        "errors"
+        "fmt"
+        "strings"
+)
+
+const (
+        minUserNameLength   = 3
+        maxUserNameLength   = 255
+        minWalletNameLength = 3
+        maxWalletNameLength = 255
+        minBalance          = 500
+        maxBalance          = 10000
+)
+
+var validWalletTypes = []string{"Savings", "Credit Card", "Crypto Wallet"}
+
+
+func ValidateWalletRequest(wallet *WalletRequest) error <span class="cov8" title="1">{
+        var errMsgs []string
+
+        if wallet.UserID &lt;= 0 </span><span class="cov8" title="1">{
+                errMsgs = append(errMsgs, "UserID must be greater than 0")
+        }</span>
+
+        <span class="cov8" title="1">if len(wallet.UserName) &lt; minUserNameLength || len(wallet.UserName) &gt; maxUserNameLength </span><span class="cov0" title="0">{
+                errMsgs = append(errMsgs, fmt.Sprintf("UserName must be between %d and %d characters", minUserNameLength, maxUserNameLength))
+        }</span>
+
+        <span class="cov8" title="1">if len(wallet.WalletName) &lt; minWalletNameLength || len(wallet.WalletName) &gt; maxWalletNameLength </span><span class="cov8" title="1">{
+                errMsgs = append(errMsgs, fmt.Sprintf("WalletName must be between %d and %d characters", minWalletNameLength, maxWalletNameLength))
+        }</span>
+
+        <span class="cov8" title="1">if !contains(validWalletTypes, wallet.WalletType) </span><span class="cov0" title="0">{
+                errMsgs = append(errMsgs, fmt.Sprintf("WalletType must be one of: %s", strings.Join(validWalletTypes, ", ")))
+        }</span>
+
+        <span class="cov8" title="1">if wallet.Balance &lt;= 0 || wallet.Balance &lt; minBalance || wallet.Balance &gt; maxBalance </span><span class="cov0" title="0">{
+                errMsgs = append(errMsgs, fmt.Sprintf("Balance must be greater than 0 and between %d and %d", minBalance, maxBalance))
+        }</span>
+
+        <span class="cov8" title="1">if len(errMsgs) &gt; 0 </span><span class="cov8" title="1">{
+                return errors.New(strings.Join(errMsgs, "; "))
+        }</span>
+
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func contains(arr []string, str string) bool <span class="cov8" title="1">{
+        for _, a := range arr </span><span class="cov8" title="1">{
+                if a == str </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+        }
+        <span class="cov0" title="0">return false</span>
 }</pre>
 		
 		</div>

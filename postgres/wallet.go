@@ -128,45 +128,6 @@ func (p *Postgres) Create(w *Wallet) (*Wallet, error) {
 	return w, err
 }
 
-// func (p *Postgres) CountWalletsByCriteria(criteria *Wallet) (int, error) {
-//     query := "SELECT count(id) FROM wallets WHERE "
-//     var conditions []string
-//     var args []interface{}
-
-//     // Iterate over struct fields
-//     v := reflect.ValueOf(criteria)
-//     for i := 0; i < v.NumField(); i++ {
-//         fieldName := v.Type().Field(i).Tag.Get("postgres") // Get the tag value from struct definition
-//         fieldValue := v.Field(i).Interface()               // Get the field value
-//         if fieldValue != reflect.Zero(v.Field(i).Type()).Interface() {
-//             conditions = append(conditions, fmt.Sprintf("%s = $%d", fieldName, len(args)+1))
-//             args = append(args, fieldValue)
-//         }
-//     }
-
-//     query += strings.Join(conditions, " AND ")
-
-//     rows, err := p.Db.Query(query, args...)
-//     if err != nil {
-//         return nil, err
-//     }
-//     defer rows.Close()
-
-//     var wallets []Wallet
-//     for rows.Next() {
-//         var wallet Wallet
-//         err := rows.Scan(&wallet.ID, &wallet.UserID, &wallet.UserName, &wallet.WalletName, &wallet.WalletType, &wallet.Balance, &wallet.CreatedAt)
-//         if err != nil {
-//             return nil, fmt.Errorf("error scanning wallet row: %v", err)
-//         }
-//         wallets = append(wallets, wallet)
-//     }
-//     if err := rows.Err(); err != nil {
-//         return nil, fmt.Errorf("error iterating over wallet rows: %v", err)
-//     }
-
-//     return wallets, nil
-// }
 
 func (p *Postgres) CountByCriteria(criteria Wallet) (int, error) {
 	query := "SELECT count(id) FROM user_wallet WHERE "
