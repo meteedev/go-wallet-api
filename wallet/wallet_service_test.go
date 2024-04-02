@@ -5,9 +5,8 @@ import (
 
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/mock"
-    "github.com/yourusername/yourprojectname/apperrs"
-    "github.com/yourusername/yourprojectname/postgres"
-    "github.com/yourusername/yourprojectname/wallet"
+	"github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
+    "github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
 )
 
 // MockWalletStore is a mock implementation of postgres.Storer for testing
@@ -23,6 +22,11 @@ func (m *MockWalletStore) FindAll() ([]postgres.Wallet, error) {
 func (m *MockWalletStore) FindByWalletType(walletType string) ([]postgres.Wallet, error) {
     args := m.Called(walletType)
     return args.Get(0).([]postgres.Wallet), args.Error(1)
+}
+
+func (m *MockWalletStore) FindByWalletId(walletId int) (*postgres.Wallet, error) {
+    args := m.Called(walletId)
+    return args.Get(0).(*postgres.Wallet), args.Error(1)
 }
 
 func (m *MockWalletStore) FindByUserId(userId int) ([]postgres.Wallet, error) {
@@ -52,14 +56,19 @@ func (m *MockWalletStore) UpdateByWalletId(walletId int, wallet postgres.Wallet)
 
 func TestGetAllWallets(t *testing.T) {
     // Define test data
-    testWallets := []postgres.Wallet{
+    storeWallet := []postgres.Wallet{
+        {ID: 1, UserID: 123, UserName: "user1", WalletName: "wallet1", WalletType: "type1", Balance: 100.00},
+        {ID: 2, UserID: 456, UserName: "user2", WalletName: "wallet2", WalletType: "type2", Balance: 200.00},
+    }
+
+    testWallets := []wallet.Wallet{
         {ID: 1, UserID: 123, UserName: "user1", WalletName: "wallet1", WalletType: "type1", Balance: 100.00},
         {ID: 2, UserID: 456, UserName: "user2", WalletName: "wallet2", WalletType: "type2", Balance: 200.00},
     }
 
     // Create a mock instance
     mockStore := new(MockWalletStore)
-    mockStore.On("FindAll").Return(testWallets, nil)
+    mockStore.On("FindAll").Return(storeWallet, nil)
 
     // Create WalletService with mock store
     walletService := wallet.WalletService{WalletStore: mockStore}
@@ -76,13 +85,20 @@ func TestGetAllWallets(t *testing.T) {
 func TestGetWalletsByWalletType(t *testing.T) {
     // Define test data
     walletType := "type1"
-    testWallets := []postgres.Wallet{
+    
+    storeWallets := []postgres.Wallet{
         {ID: 1, UserID: 123, UserName: "user1", WalletName: "wallet1", WalletType: walletType, Balance: 100.00},
     }
 
+    testWallets := []wallet.Wallet{
+        {ID: 1, UserID: 123, UserName: "user1", WalletName: "wallet1", WalletType: walletType, Balance: 100.00},
+    }
+
+
+
     // Create a mock instance
     mockStore := new(MockWalletStore)
-    mockStore.On("FindByWalletType", walletType).Return(testWallets, nil)
+    mockStore.On("FindByWalletType", walletType).Return(storeWallets, nil)
 
     // Create WalletService with mock store
     walletService := wallet.WalletService{WalletStore: mockStore}
@@ -99,13 +115,18 @@ func TestGetWalletsByWalletType(t *testing.T) {
 func TestGetWalletsByUserId(t *testing.T) {
     // Define test data
     userID := 123
-    testWallets := []postgres.Wallet{
+
+    storeWallets := []postgres.Wallet{
+        {ID: 1, UserID: userID, UserName: "user1", WalletName: "wallet1", WalletType: "type1", Balance: 100.00},
+    }
+
+    testWallets := []wallet.Wallet{
         {ID: 1, UserID: userID, UserName: "user1", WalletName: "wallet1", WalletType: "type1", Balance: 100.00},
     }
 
     // Create a mock instance
     mockStore := new(MockWalletStore)
-    mockStore.On("FindByUserId", userID).Return(testWallets, nil)
+    mockStore.On("FindByUserId", userID).Return(storeWallets, nil)
 
     // Create WalletService with mock store
     walletService := wallet.WalletService{WalletStore: mockStore}
@@ -125,10 +146,20 @@ func TestCreateWallet(t *testing.T) {
         UserID:     123,
         UserName:   "user1",
         WalletName: "wallet1",
-        WalletType: "type1",
-        Balance:    100.00,
+        WalletType: "Savings",
+        Balance:    600.00,
     }
-    testWallet := &postgres.Wallet{
+    
+    createWallet := &postgres.Wallet{
+        ID:         1,
+        UserID:     request.UserID,
+        UserName:   request.UserName,
+        WalletName: request.WalletName,
+        WalletType: request.WalletType,
+        Balance:    request.Balance,
+    }
+
+    testWallet := &wallet.Wallet{
         ID:         1,
         UserID:     request.UserID,
         UserName:   request.UserName,
@@ -139,7 +170,7 @@ func TestCreateWallet(t *testing.T) {
 
     // Create a mock instance
     mockStore := new(MockWalletStore)
-    mockStore.On("Create", mock.AnythingOfType("*postgres.Wallet")).Return(testWallet, nil)
+    mockStore.On("Create", mock.AnythingOfType("*postgres.Wallet")).Return(createWallet, nil)
     mockStore.On("CountByCriteria", mock.AnythingOfType("postgres.Wallet")).Return(0, nil)
 
     // Create WalletService with mock store
@@ -172,7 +203,7 @@ func TestCheckDuplicated(t *testing.T) {
     walletService := wallet.WalletService{WalletStore: mockStore}
 
     // Call the function under test
-    isDuplicated, err := walletService.checkDuplicated(testWallet)
+    isDuplicated, err := walletService.CheckDuplicated(testWallet)
 
     // Assert the result
     assert.NoError(t, err)
@@ -207,13 +238,25 @@ func TestUpdateWalletByWalletId(t *testing.T) {
         UserID:     123,
         UserName:   "user1",
         WalletName: "updated_wallet1",
-        WalletType: "type1",
-        Balance:    150.00,
+        WalletType: "Savings",
+        Balance:    650.00,
+    }
+
+
+
+    testWallet := &postgres.Wallet{
+        ID:         walletID,
+        UserID:     123,
+        UserName:   "user1",
+        WalletName: "updated_wallet1",
+        WalletType: "Savings",
+        Balance:    650.00,
     }
 
     // Create a mock instance
     mockStore := new(MockWalletStore)
     mockStore.On("UpdateByWalletId", walletID, mock.AnythingOfType("postgres.Wallet")).Return(int64(1), nil)
+    mockStore.On("FindByWalletId", walletID).Return(testWallet, nil)
 
     // Create WalletService with mock store
     walletService := wallet.WalletService{WalletStore: mockStore}

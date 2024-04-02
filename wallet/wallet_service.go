@@ -106,7 +106,7 @@ func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error){
 }
 
 
-func (ws WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
+func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 	
 	
 	err := ValidateWalletRequest(request)
@@ -124,7 +124,7 @@ func (ws WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 		Balance:    request.Balance,
 	}
 
-	isDuplicated , err := ws.checkDuplicated(wallet)
+	isDuplicated , err := s.CheckDuplicated(wallet)
 
 	if err != nil{
 		log.Println(err)
@@ -137,7 +137,7 @@ func (ws WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 	}
 
 	
-	w , err := ws.WalletStore.Create(&wallet)
+	w , err := s.WalletStore.Create(&wallet)
 	
 	if err != nil{
 		log.Println(err)
@@ -158,8 +158,8 @@ func (ws WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 	return &walletResponses,nil
 }
 
-func (ws WalletService) checkDuplicated(wallet postgres.Wallet) (bool,error){
-	rowCount , err := ws.WalletStore.CountByCriteria(wallet)
+func (s WalletService) CheckDuplicated(wallet postgres.Wallet) (bool,error){
+	rowCount , err := s.WalletStore.CountByCriteria(wallet)
 	
 	if err!= nil{
 		return false,err
@@ -172,9 +172,9 @@ func (ws WalletService) checkDuplicated(wallet postgres.Wallet) (bool,error){
 
 
 
-func (ws WalletService) DeleteWalletByUserId(userId string)(int64,error){
+func (s WalletService) DeleteWalletByUserId(userId string)(int64,error){
 	
-	deleteRow , err := ws.WalletStore.DeleteByUserId(userId)
+	deleteRow , err := s.WalletStore.DeleteByUserId(userId)
 	
 
 	if err != nil{
@@ -191,7 +191,7 @@ func (ws WalletService) DeleteWalletByUserId(userId string)(int64,error){
 }
 
 
-func (ws WalletService) UpdateWalletByWalletId(walletId int,request *WalletRequest) (*Wallet,error){
+func (s WalletService) UpdateWalletByWalletId(walletId int,request *WalletRequest) (*Wallet,error){
 	
 	err := ValidateWalletRequest(request)
 
@@ -209,7 +209,7 @@ func (ws WalletService) UpdateWalletByWalletId(walletId int,request *WalletReque
 		Balance:    request.Balance,
 	}
 
-	updateRow , err := ws.WalletStore.UpdateByWalletId(walletId,wallet)
+	updateRow , err := s.WalletStore.UpdateByWalletId(walletId,wallet)
 	
 
 	if err != nil{
@@ -222,7 +222,7 @@ func (ws WalletService) UpdateWalletByWalletId(walletId int,request *WalletReque
 		return nil,apperrs.NewUnprocessableEntity("Delete wallet failed")
 	}
 
-	w , err := ws.WalletStore.FindByWalletId(walletId)
+	w , err := s.WalletStore.FindByWalletId(walletId)
 
 	if err != nil{
 		log.Println(err)
