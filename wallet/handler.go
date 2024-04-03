@@ -68,7 +68,7 @@ func (h *Handler) WalletHandler(c echo.Context) error {
 func (h *Handler) WalletByUserIdHandler(c echo.Context) error {
 	userId , err := strconv.Atoi(c.Param("id"))
 
-	log.Printf("userId ",userId)
+	log.Printf("userId %d",userId)
 
 	if err != nil {
         return apperrs.NewBadRequestError("invalid user ID")
