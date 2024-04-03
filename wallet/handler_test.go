@@ -78,53 +78,6 @@ func TestWalletByUserIdHandler(t *testing.T) {
 }
 
 
-func TestUpdateWalletHandler(t *testing.T) {
-	mockService := new(MockService)
-	handler := NewHandler(mockService)
-
-	walletID := "123"
-	reqBody := WalletRequest{
-		UserID:     1,
-		UserName:   "User1",
-		WalletName: "Wallet1",
-		WalletType: "Type1",
-		Balance:    100.0,
-	}
-
-	mockWallet := Wallet{
-		ID:         123,
-		UserID:     reqBody.UserID,
-		UserName:   reqBody.UserName,
-		WalletName: reqBody.WalletName,
-		WalletType: reqBody.WalletType,
-		Balance:    reqBody.Balance,
-	}
-
-	mockService.On("UpdateWalletByWalletId", 123, &reqBody).Return(&mockWallet, nil)
-
-	e := echo.New()
-	reqBodyBytes, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest(http.MethodPut, "/api/v1/wallets/"+walletID, bytes.NewReader(reqBodyBytes))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/api/v1/wallets/:id")
-	c.SetParamNames("id")
-	c.SetParamValues(walletID)
-
-	if assert.NoError(t, handler.UpdateWalletHandler(c)) {
-		assert.Equal(t, http.StatusOK, rec.Code)
-
-		var responseWallet Wallet
-		err := json.Unmarshal(rec.Body.Bytes(), &responseWallet)
-		assert.NoError(t, err)
-
-		assert.Equal(t, mockWallet, responseWallet)
-	}
-
-	mockService.AssertExpectations(t)
-}
-
 func TestDeleteWalletHandler(t *testing.T) {
     mockService := new(MockService)
     handler := NewHandler(mockService)
@@ -248,3 +201,49 @@ func TestCreateWalletHandler(t *testing.T) {
 }
 
 
+func TestUpdateWalletHandler(t *testing.T) {
+	mockService := new(MockService)
+	handler := NewHandler(mockService)
+
+	walletID := "123"
+	reqBody := WalletRequest{
+		UserID:     1,
+		UserName:   "User1",
+		WalletName: "Wallet1",
+		WalletType: "Type1",
+		Balance:    100.0,
+	}
+
+	mockWallet := Wallet{
+		ID:         123,
+		UserID:     reqBody.UserID,
+		UserName:   reqBody.UserName,
+		WalletName: reqBody.WalletName,
+		WalletType: reqBody.WalletType,
+		Balance:    reqBody.Balance,
+	}
+
+	mockService.On("UpdateWalletByWalletId", 123, &reqBody).Return(&mockWallet, nil)
+
+	e := echo.New()
+	reqBodyBytes, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/wallets/"+walletID, bytes.NewReader(reqBodyBytes))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/api/v1/wallets/:id")
+	c.SetParamNames("id")
+	c.SetParamValues(walletID)
+
+	if assert.NoError(t, handler.UpdateWalletHandler(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var responseWallet Wallet
+		err := json.Unmarshal(rec.Body.Bytes(), &responseWallet)
+		assert.NoError(t, err)
+
+		assert.Equal(t, mockWallet, responseWallet)
+	}
+
+	mockService.AssertExpectations(t)
+}

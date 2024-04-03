@@ -1,67 +1,138 @@
-package wallet_test
+package wallet
 
 import (
-	"errors"
-    "testing"
-
-	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
-	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
 )
 
 func TestValidateWalletRequest(t *testing.T) {
-    // Test cases
     testCases := []struct {
-        name     string
-        wallet   *wallet.WalletRequest
-        expected error
+        name      string
+        wallet    *WalletRequest
+        wantError bool
     }{
-        // Valid wallet request
         {
-            name: "Valid Wallet Request",
-            wallet: &wallet.WalletRequest{
-                UserID:     123,
-                UserName:   "username",
-                WalletName: "Wallet",
+            name: "Valid wallet request",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: "Savings",
                 WalletType: "Savings",
                 Balance:    1000,
             },
-            expected: nil,
+            wantError: false,
         },
-        // Invalid UserID
         {
-            name: "Invalid UserID",
-            wallet: &wallet.WalletRequest{
-                UserID:     0,
-                UserName:   "username",
-                WalletName: "Wallet",
+            name: "Invalid UserID (negative)",
+            wallet: &WalletRequest{
+                UserID:     -1,
+                UserName:   "JohnDoe",
+                WalletName: "Savings",
                 WalletType: "Savings",
                 Balance:    1000,
             },
-            expected: errors.New("UserID must be greater than 0"),
+            wantError: true,
         },
-        // Invalid WalletName
         {
-            name: "Invalid WalletName",
-            wallet: &wallet.WalletRequest{
-                UserID:     123,
-                UserName:   "username",
-                WalletName: "W",
+            name: "Invalid UserName (too short)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JD",
+                WalletName: "Savings",
                 WalletType: "Savings",
                 Balance:    1000,
             },
-            expected: errors.New("WalletName must be between 3 and 255 characters"),
+            wantError: true,
         },
-        // Add more test cases as needed
+        {
+            name: "Invalid UserName (too long)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   strings.Repeat("a", 300),
+                WalletName: "Savings",
+                WalletType: "Savings",
+                Balance:    1000,
+            },
+            wantError: true,
+        },
+        {
+            name: "Invalid WalletName (too short)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: "W1",
+                WalletType: "Savings",
+                Balance:    1000,
+            },
+            wantError: true,
+        },
+        {
+            name: "Invalid WalletName (too long)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: strings.Repeat("a", 300),
+                WalletType: "Savings",
+                Balance:    1000,
+            },
+            wantError: true,
+        },
+        {
+            name: "Invalid WalletType",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: "Savings",
+                WalletType: "InvalidType",
+                Balance:    1000,
+            },
+            wantError: true,
+        },
+        {
+            name: "Invalid Balance (negative)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: "Savings",
+                WalletType: "Savings",
+                Balance:    -100,
+            },
+            wantError: true,
+        },
+        {
+            name: "Invalid Balance (below minimum)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: "Savings",
+                WalletType: "Savings",
+                Balance:    200,
+            },
+            wantError: true,
+        },
+        {
+            name: "Invalid Balance (above maximum)",
+            wallet: &WalletRequest{
+                UserID:     1,
+                UserName:   "JohnDoe",
+                WalletName: "Savings",
+                WalletType: "Savings",
+                Balance:    11000,
+            },
+            wantError: true,
+        },
     }
 
-    // Iterate over test cases
     for _, tc := range testCases {
         t.Run(tc.name, func(t *testing.T) {
-            // Call the function under test
-            err := wallet.ValidateWalletRequest(tc.wallet)
-
-            // Assert the result
-            assert.Equal(t, tc.expected, err)
+            validateWalletRequestTest(t, tc.wallet, tc.wantError)
         })
+    }
+}
+
+func validateWalletRequestTest(t *testing.T, wallet *WalletRequest, wantError bool) {
+    err := ValidateWalletRequest(wallet)
+    if (err != nil) != wantError {
+        t.Errorf("ValidateWalletRequest(%v) returned error: %v, wantError: %t", wallet, err, wantError)
     }
 }
