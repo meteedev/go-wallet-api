@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -67,6 +68,8 @@ func (h *Handler) WalletHandler(c echo.Context) error {
 func (h *Handler) WalletByUserIdHandler(c echo.Context) error {
 	userId , err := strconv.Atoi(c.Param("id"))
 
+	log.Printf("userId ",userId)
+
 	if err != nil {
         return apperrs.NewBadRequestError("invalid user ID")
     }
@@ -130,13 +133,16 @@ func (h *Handler) DeleteWalletHandler(c echo.Context) error {
 		return apperrs.NewBadRequestError("user id required")
 	}
 
-	rowAffected, err := h.service.DeleteWalletByUserId(userId)
+	_, err := h.service.DeleteWalletByUserId(userId)
 
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, rowAffected)
+	return c.JSON(http.StatusOK, apperrs.CustomError{
+		Code: http.StatusOK,
+		Message: "Delete Success",
+	})
 
 }
 

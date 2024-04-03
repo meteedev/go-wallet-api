@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"log"
+	"fmt"
 
 	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
@@ -11,12 +12,11 @@ type WalletService struct {
 	WalletStore postgres.Storer
 }
 
-
 func NewService(db postgres.Storer) WalletService {
 	return WalletService{WalletStore: db}
 }
 
-func (s WalletService) GetAllWallets() ([]Wallet, error){
+func (s WalletService) GetAllWallets() ([]Wallet, error) {
 
 	wallets, err := s.WalletStore.FindAll()
 
@@ -24,7 +24,7 @@ func (s WalletService) GetAllWallets() ([]Wallet, error){
 		return nil, apperrs.NewInternalServerError(err.Error())
 	}
 
-	if len(wallets)==0{
+	if len(wallets) == 0 {
 		return nil, apperrs.NewNotFoundError("wallet not found")
 	}
 
@@ -41,12 +41,11 @@ func (s WalletService) GetAllWallets() ([]Wallet, error){
 		})
 	}
 
-	return walletResponses,nil
+	return walletResponses, nil
 
 }
 
-
-func (s WalletService) GetWalletsByWalletType(walletType string) ([]Wallet, error){
+func (s WalletService) GetWalletsByWalletType(walletType string) ([]Wallet, error) {
 
 	wallets, err := s.WalletStore.FindByWalletType(walletType)
 
@@ -54,7 +53,7 @@ func (s WalletService) GetWalletsByWalletType(walletType string) ([]Wallet, erro
 		return nil, apperrs.NewInternalServerError(err.Error())
 	}
 
-	if len(wallets)==0{
+	if len(wallets) == 0 {
 		return nil, apperrs.NewNotFoundError("wallet not found")
 	}
 
@@ -71,12 +70,11 @@ func (s WalletService) GetWalletsByWalletType(walletType string) ([]Wallet, erro
 		})
 	}
 
-	return walletResponses,nil
+	return walletResponses, nil
 
 }
 
-
-func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error){
+func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error) {
 
 	wallets, err := s.WalletStore.FindByUserId(userId)
 
@@ -84,7 +82,7 @@ func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error){
 		return nil, apperrs.NewInternalServerError(err.Error())
 	}
 
-	if len(wallets)==0{
+	if len(wallets) == 0 {
 		return nil, apperrs.NewNotFoundError("wallet not found")
 	}
 
@@ -101,19 +99,17 @@ func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error){
 		})
 	}
 
-	return walletResponses,nil
+	return walletResponses, nil
 
 }
 
+func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet, error) {
 
-func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
-	
-	
 	err := ValidateWalletRequest(request)
 
-	if err != nil{
+	if err != nil {
 		log.Println(err)
-		return nil,apperrs.NewBadRequestError(err.Error())
+		return nil, apperrs.NewBadRequestError(err.Error())
 	}
 
 	wallet := postgres.Wallet{
@@ -124,24 +120,23 @@ func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 		Balance:    request.Balance,
 	}
 
-	isDuplicated , err := s.CheckDuplicated(wallet)
+	isDuplicated, err := s.CheckDuplicated(wallet)
 
-	if err != nil{
+	if err != nil {
 		log.Println(err)
-		return nil,apperrs.NewInternalServerError(err.Error())
+		return nil, apperrs.NewInternalServerError(err.Error())
 	}
 
 	if isDuplicated {
-		log.Printf("Duplicated wallet userid=%d userName=%s walletname=%s walletType=%s",wallet.UserID,wallet.UserName,wallet.WalletName,wallet.WalletType)
-		return nil,apperrs.NewInternalServerError("Duplicated wallets")
+		log.Printf("Duplicated wallet userid=%d userName=%s walletname=%s walletType=%s", wallet.UserID, wallet.UserName, wallet.WalletName, wallet.WalletType)
+		return nil, apperrs.NewInternalServerError("Duplicated wallets")
 	}
 
-	
-	w , err := s.WalletStore.Create(&wallet)
-	
-	if err != nil{
+	w, err := s.WalletStore.Create(&wallet)
+
+	if err != nil {
 		log.Println(err)
-		return nil,apperrs.NewInternalServerError("Create wallet failed")
+		return nil, apperrs.NewInternalServerError("Create wallet failed")
 	}
 
 	walletResponses := Wallet{
@@ -154,53 +149,57 @@ func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet,error){
 		CreatedAt:  w.CreatedAt,
 	}
 
-
-	return &walletResponses,nil
+	return &walletResponses, nil
 }
 
-func (s WalletService) CheckDuplicated(wallet postgres.Wallet) (bool,error){
-	rowCount , err := s.WalletStore.CountByCriteria(wallet)
-	
-	if err!= nil{
-		return false,err
+func (s WalletService) CheckDuplicated(wallet postgres.Wallet) (bool, error) {
+
+	//user_id , user_name , wallet_name , wallet_type,
+
+	criteria := postgres.Wallet{
+		UserID:     wallet.ID,
+		UserName:   wallet.UserName,
+		WalletName: wallet.WalletName,
+		WalletType: wallet.WalletType,
+	}
+
+	rowCount, err := s.WalletStore.CountByCriteria(criteria)
+
+	if err != nil {
+		return false, err
 	}
 
 	isDup := rowCount > 0
 
-	return isDup , nil
+	return isDup, nil
 }
 
+func (s WalletService) DeleteWalletByUserId(userId string) (int64, error) {
 
+	deleteRow, err := s.WalletStore.DeleteByUserId(userId)
 
-func (s WalletService) DeleteWalletByUserId(userId string)(int64,error){
-	
-	deleteRow , err := s.WalletStore.DeleteByUserId(userId)
-	
-
-	if err != nil{
+	if err != nil {
 		log.Println(err)
-		return 0,apperrs.NewInternalServerError("Delete wallet failed")
-	}
-	
-	if deleteRow == 0{
-		log.Println("delete affected ",deleteRow)
-		return 0,apperrs.NewUnprocessableEntity("Delete wallet failed")
+		return 0, apperrs.NewInternalServerError("Delete wallet failed")
 	}
 
-	return deleteRow,nil
+	if deleteRow == 0 {
+		log.Println("delete affected ", deleteRow)
+		return 0, apperrs.NewUnprocessableEntity("Delete wallet failed")
+	}
+
+	return deleteRow, nil
 }
 
+func (s WalletService) UpdateWalletByWalletId(walletId int, request *WalletRequest) (*Wallet, error) {
 
-func (s WalletService) UpdateWalletByWalletId(walletId int,request *WalletRequest) (*Wallet,error){
-	
 	err := ValidateWalletRequest(request)
 
-	if err != nil{
+	if err != nil {
 		log.Println(err)
-		return nil,apperrs.NewBadRequestError(err.Error())
+		return nil, apperrs.NewBadRequestError(err.Error())
 	}
-	
-	
+
 	wallet := postgres.Wallet{
 		UserID:     request.UserID,
 		UserName:   request.UserName,
@@ -209,24 +208,41 @@ func (s WalletService) UpdateWalletByWalletId(walletId int,request *WalletReques
 		Balance:    request.Balance,
 	}
 
-	updateRow , err := s.WalletStore.UpdateByWalletId(walletId,wallet)
-	
+	isDuplicated, err := s.CheckDuplicated(wallet)
 
-	if err != nil{
+	if err != nil {
 		log.Println(err)
-		return nil,apperrs.NewInternalServerError("Update wallet failed")
-	}
-	
-	if updateRow == 0{
-		log.Println("update affected ",updateRow)
-		return nil,apperrs.NewUnprocessableEntity("Delete wallet failed")
+		return nil, apperrs.NewInternalServerError(err.Error())
 	}
 
-	w , err := s.WalletStore.FindByWalletId(walletId)
+	if isDuplicated {
+		errMsg := fmt.Sprintf(" Update wallet failed :exist wallet userid=%d userName=%s walletname=%s walletType=%s", wallet.UserID, wallet.UserName, wallet.WalletName, wallet.WalletType)
+		log.Printf(errMsg)
+		return nil, apperrs.NewInternalServerError(errMsg)
+	}
 
-	if err != nil{
+	if err != nil {
 		log.Println(err)
-		return nil,apperrs.NewInternalServerError("Update wallet failed")
+		return nil, apperrs.NewInternalServerError(err.Error())
+	}
+
+	updateRow, err := s.WalletStore.UpdateByWalletId(walletId, wallet)
+
+	if err != nil {
+		log.Println(err)
+		return nil, apperrs.NewInternalServerError("Update wallet failed")
+	}
+
+	if updateRow == 0 {
+		log.Println("update affected ", updateRow)
+		return nil, apperrs.NewUnprocessableEntity("Delete wallet failed")
+	}
+
+	w, err := s.WalletStore.FindByWalletId(walletId)
+
+	if err != nil {
+		log.Println(err)
+		return nil, apperrs.NewInternalServerError("Update wallet failed")
 	}
 
 	walletResponses := Wallet{
@@ -239,7 +255,5 @@ func (s WalletService) UpdateWalletByWalletId(walletId int,request *WalletReques
 		CreatedAt:  w.CreatedAt,
 	}
 
-	return &walletResponses,nil
+	return &walletResponses, nil
 }
-
-

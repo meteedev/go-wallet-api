@@ -15,11 +15,11 @@ type Wallet struct {
 }
 
 type WalletRequest struct {
-	UserID     int     `json:"user_id" example:"1" validate:"required"`
-	UserName   string  `json:"user_name" example:"John Doe" validate:"required,min=3,max=255"`
-	WalletName string  `json:"wallet_name" example:"John's Wallet" validate:"required,min=3,max=255"`
-	WalletType string  `json:"wallet_type" example:"Credit Card" validate:"required,oneof='Savings' 'Credit Card' 'Crypto Wallet'"`
-	Balance    float64 `json:"balance" example:"100.00" validate:"required,gt=0,min=500,max=10000"`
+	UserID     int     `json:"user_id" example:"1"`
+	UserName   string  `json:"user_name" example:"John Doe"`
+	WalletName string  `json:"wallet_name" example:"John's Wallet"`
+	WalletType string  `json:"wallet_type" example:"Credit Card"`
+	Balance    float64 `json:"balance" example:"100.00"`
 }
 
 
