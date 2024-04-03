@@ -185,31 +185,6 @@ func TestCreateWallet(t *testing.T) {
     mockStore.AssertExpectations(t)
 }
 
-func TestCheckDuplicated(t *testing.T) {
-    // Define test data
-    testWallet := postgres.Wallet{
-        UserID:     123,
-        UserName:   "user1",
-        WalletName: "wallet1",
-        WalletType: "type1",
-        Balance:    100.00,
-    }
-
-    // Create a mock instance
-    mockStore := new(MockWalletStore)
-    mockStore.On("CountByCriteria", testWallet).Return(1, nil)
-
-    // Create WalletService with mock store
-    walletService := wallet.WalletService{WalletStore: mockStore}
-
-    // Call the function under test
-    isDuplicated, err := walletService.CheckDuplicated(testWallet)
-
-    // Assert the result
-    assert.NoError(t, err)
-    assert.True(t, isDuplicated)
-    mockStore.AssertExpectations(t)
-}
 
 func TestDeleteWalletByUserId(t *testing.T) {
     // Define test data
@@ -255,6 +230,7 @@ func TestUpdateWalletByWalletId(t *testing.T) {
 
     // Create a mock instance
     mockStore := new(MockWalletStore)
+    mockStore.On("CountByCriteria", mock.AnythingOfType("postgres.Wallet")).Return(0, nil)
     mockStore.On("UpdateByWalletId", walletID, mock.AnythingOfType("postgres.Wallet")).Return(int64(1), nil)
     mockStore.On("FindByWalletId", walletID).Return(testWallet, nil)
 

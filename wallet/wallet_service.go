@@ -217,14 +217,10 @@ func (s WalletService) UpdateWalletByWalletId(walletId int, request *WalletReque
 
 	if isDuplicated {
 		errMsg := fmt.Sprintf(" Update wallet failed :exist wallet userid=%d userName=%s walletname=%s walletType=%s", wallet.UserID, wallet.UserName, wallet.WalletName, wallet.WalletType)
-		log.Printf(errMsg)
+		log.Println(errMsg)
 		return nil, apperrs.NewInternalServerError(errMsg)
 	}
 
-	if err != nil {
-		log.Println(err)
-		return nil, apperrs.NewInternalServerError(err.Error())
-	}
 
 	updateRow, err := s.WalletStore.UpdateByWalletId(walletId, wallet)
 

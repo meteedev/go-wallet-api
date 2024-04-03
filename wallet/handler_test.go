@@ -118,36 +118,6 @@ func TestCreateWalletHandler(t *testing.T) {
 
 	mockService.AssertExpectations(t)
 }
-
-func TestDeleteWalletHandler(t *testing.T) {
-	mockService := new(MockService)
-	handler := NewHandler(mockService)
-
-	userID := "123"
-
-	mockService.On("DeleteWalletByUserId", userID).Return(int64(1), nil)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodDelete, "/api/v1/users/"+userID+"/wallets", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/api/v1/users/:id/wallets")
-	c.SetParamNames("id")
-	c.SetParamValues(userID)
-
-	if assert.NoError(t, handler.DeleteWalletHandler(c)) {
-		assert.Equal(t, http.StatusOK, rec.Code)
-
-		var response int64
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		assert.NoError(t, err)
-
-		assert.Equal(t, int64(1), response)
-	}
-
-	mockService.AssertExpectations(t)
-}
-
 func TestUpdateWalletHandler(t *testing.T) {
 	mockService := new(MockService)
 	handler := NewHandler(mockService)
@@ -193,4 +163,36 @@ func TestUpdateWalletHandler(t *testing.T) {
 	}
 
 	mockService.AssertExpectations(t)
+}
+
+func TestDeleteWalletHandler(t *testing.T) {
+    mockService := new(MockService)
+    handler := NewHandler(mockService)
+
+    userID := "123"
+
+    mockService.On("DeleteWalletByUserId", userID).Return(int64(1), nil)
+
+    e := echo.New()
+    req := httptest.NewRequest(http.MethodDelete, "/api/v1/users/"+userID+"/wallets", nil)
+    rec := httptest.NewRecorder()
+    c := e.NewContext(req, rec)
+    c.SetPath("/api/v1/users/:id/wallets")
+    c.SetParamNames("id")
+    c.SetParamValues(userID)
+
+    if assert.NoError(t, handler.DeleteWalletHandler(c)) {
+        assert.Equal(t, http.StatusOK, rec.Code)
+
+        // Ensure that the response body is valid JSON
+        var response map[string]interface{}
+        err := json.Unmarshal(rec.Body.Bytes(), &response)
+        assert.NoError(t, err)
+
+        // Check the response fields
+        assert.Equal(t, float64(200), response["code"])
+        assert.Equal(t, "Delete Success", response["message"])
+    }
+
+    mockService.AssertExpectations(t)
 }
