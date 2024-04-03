@@ -41,6 +41,8 @@ func (m *MockService) UpdateWalletByWalletId(walletId int, request *WalletReques
 	return args.Get(0).(*Wallet), args.Error(1)
 }
 
+
+
 // Helper function to convert WalletRequest to Wallet
 func toWallet(request *WalletRequest) *Wallet {
 	return &Wallet{

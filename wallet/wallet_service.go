@@ -129,7 +129,7 @@ func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet, error) {
 
 	if isDuplicated {
 		log.Printf("Duplicated wallet userid=%d userName=%s walletname=%s walletType=%s", wallet.UserID, wallet.UserName, wallet.WalletName, wallet.WalletType)
-		return nil, apperrs.NewInternalServerError("Duplicated wallets")
+		return nil, apperrs.NewInternalServerError("Duplicated wallet")
 	}
 
 	w, err := s.WalletStore.Create(&wallet)

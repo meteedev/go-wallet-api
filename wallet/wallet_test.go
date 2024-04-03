@@ -1,14 +1,14 @@
 package wallet
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"encoding/json"
 
+	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
 )
 
 type StubService struct {
@@ -132,4 +132,8 @@ func TestWallet(t *testing.T) {
 
 }
 
-
+func TestCreateWallet(t *testing.T) {
+	t.Run("given wallet detail  should return wallet that save with wallet id", func(t *testing.T) {
+		
+	})
+}

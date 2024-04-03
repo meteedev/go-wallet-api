@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
 	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWalletHandler(t *testing.T) {
@@ -76,48 +77,7 @@ func TestWalletByUserIdHandler(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
-func TestCreateWalletHandler(t *testing.T) {
-	mockService := new(MockService)
-	handler := NewHandler(mockService)
 
-	reqBody := WalletRequest{
-		UserID:     1,
-		UserName:   "User1",
-		WalletName: "Wallet1",
-		WalletType: "Type1",
-		Balance:    100.0,
-	}
-
-	mockWallet := Wallet{
-		ID:         1,
-		UserID:     reqBody.UserID,
-		UserName:   reqBody.UserName,
-		WalletName: reqBody.WalletName,
-		WalletType: reqBody.WalletType,
-		Balance:    reqBody.Balance,
-	}
-
-	mockService.On("CreateWallet", &reqBody).Return(&mockWallet, nil)
-
-	e := echo.New()
-	reqBodyBytes, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/wallets", bytes.NewReader(reqBodyBytes))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	if assert.NoError(t, handler.CreateWalletHandler(c)) {
-		assert.Equal(t, http.StatusCreated, rec.Code)
-
-		var responseWallet Wallet
-		err := json.Unmarshal(rec.Body.Bytes(), &responseWallet)
-		assert.NoError(t, err)
-
-		assert.Equal(t, mockWallet, responseWallet)
-	}
-
-	mockService.AssertExpectations(t)
-}
 func TestUpdateWalletHandler(t *testing.T) {
 	mockService := new(MockService)
 	handler := NewHandler(mockService)
@@ -196,3 +156,95 @@ func TestDeleteWalletHandler(t *testing.T) {
 
     mockService.AssertExpectations(t)
 }
+
+func TestCreateWalletHandler(t *testing.T) {
+	
+	t.Run("given walletRequest to create wallet should return 201 and wallet struct", func(t *testing.T) {
+	
+		mockService := new(MockService)
+		handler := NewHandler(mockService)
+
+		reqBody := WalletRequest{
+			UserID:     1,
+			UserName:   "User1",
+			WalletName: "Wallet1",
+			WalletType: "Type1",
+			Balance:    100.0,
+		}
+
+		mockWallet := Wallet{
+			ID:         1,
+			UserID:     reqBody.UserID,
+			UserName:   reqBody.UserName,
+			WalletName: reqBody.WalletName,
+			WalletType: reqBody.WalletType,
+			Balance:    reqBody.Balance,
+		}
+
+		mockService.On("CreateWallet", &reqBody).Return(&mockWallet, nil)
+
+		e := echo.New()
+		reqBodyBytes, _ := json.Marshal(reqBody)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/wallets", bytes.NewReader(reqBodyBytes))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		if assert.NoError(t, handler.CreateWalletHandler(c)) {
+			assert.Equal(t, http.StatusCreated, rec.Code)
+
+			var responseWallet Wallet
+			err := json.Unmarshal(rec.Body.Bytes(), &responseWallet)
+			assert.NoError(t, err)
+
+			assert.Equal(t, mockWallet, responseWallet)
+		}
+
+		mockService.AssertExpectations(t)
+
+	})
+
+
+	t.Run("given dup walletRequest to create wallet should return 500 and message duplicated", func(t *testing.T) {
+        // Set up your handler, mock service, and any necessary middleware
+        mockService := new(MockService)
+        handler := NewHandler(mockService)
+        handlerWithMiddleware := apperrs.CustomErrorMiddleware(handler.CreateWalletHandler)
+
+        // Create a sample wallet request
+        reqBody := WalletRequest{
+            UserID:     1,
+            UserName:   "User1",
+            WalletName: "Wallet1",
+            WalletType: "Type1",
+            Balance:    100.0,
+        }
+
+        // Configure the mock service to return nil and an error indicating duplication
+        errorMessage := "Duplicated wallets"
+        mockService.On("CreateWallet", &reqBody).Return(&Wallet{}, apperrs.NewInternalServerError(errorMessage))
+
+        // Prepare the HTTP request
+		e := echo.New()
+        reqBodyBytes, _ := json.Marshal(reqBody)
+        req := httptest.NewRequest(http.MethodPost, "/api/v1/wallets", bytes.NewReader(reqBodyBytes))
+        req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+        rec := httptest.NewRecorder()
+        c := e.NewContext(req, rec)
+
+
+        // Invoke the handler function and assert the response
+        assert.NoError(t, handlerWithMiddleware(c)) // Ensure that handler returns an error
+        assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+        // Optionally, you can assert the response body to ensure it contains the error message
+        assert.Contains(t, rec.Body.String(), errorMessage)
+
+        // Assert that the CreateWallet method was called with the correct parameters
+        mockService.AssertExpectations(t)
+    })
+
+
+}
+
+
