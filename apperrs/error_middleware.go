@@ -16,6 +16,7 @@ type CustomError struct {
 func CustomErrorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		err := next(c) // Call the next handler
+		log.Println("CustomErrorMiddleware",err.Error())
 		if err != nil {
 			code := http.StatusInternalServerError
 			message := "Internal Server Error"
