@@ -17,7 +17,13 @@
 
 2. env variable  powershell cannot read 
 		sol_n  have $env:
-		    $env:POSTGRES_HOST="192.168.7.161"
+		   $env:POSTGRES_HOST="localhost"
+               $env:POSTGRES_PORT=5432
+               $env:POSTGRES_USER="root"
+               $env:POSTGRES_PASSWORD="password"
+               $env:POSTGRES_DB_NAME="wallet"
+               $env:POSTGRES_SSL_MODE="disable"
+               .\main.exe clear
 	
 3. ident config go-ci.yml wrong 
 	    sol_n  install plugin 
