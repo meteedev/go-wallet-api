@@ -48,7 +48,7 @@ func TestValidateWalletRequest(t *testing.T) {
             name: "Invalid UserName (too long)",
             wallet: &WalletRequest{
                 UserID:     1,
-                UserName:   strings.Repeat("a", 300),
+                UserName:   strings.Repeat("a", maxUserNameLength+1),
                 WalletName: "Savings",
                 WalletType: "Savings",
                 Balance:    1000,
@@ -71,7 +71,7 @@ func TestValidateWalletRequest(t *testing.T) {
             wallet: &WalletRequest{
                 UserID:     1,
                 UserName:   "JohnDoe",
-                WalletName: strings.Repeat("a", 300),
+                WalletName: strings.Repeat("a", maxUserNameLength+1),
                 WalletType: "Savings",
                 Balance:    1000,
             },

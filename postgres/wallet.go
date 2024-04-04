@@ -21,7 +21,6 @@ type Wallet struct {
 }
 
 
-
 type Storer interface {
 	FindAll() ([]Wallet, error)
 	
