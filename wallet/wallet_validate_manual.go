@@ -93,7 +93,7 @@ func validateBalanceRangeMinMax(balance float64, errMsgs *[]string) {
 
 func validateBalanceGreaterThanZero(balance float64, errMsgs *[]string) {
 	if balance <= 0  {
-		*errMsgs = append(*errMsgs, fmt.Sprintf("Balance must be greater than 0 "))
+		*errMsgs = append(*errMsgs, "Balance must be greater than 0 ")
 	}
 }
 
