@@ -1,0 +1,28 @@
+1. unit test return ok 200 when  mock internal server error 500
+		sol_n  	add middleware  	
+
+        // Register the CustomErrorMiddleware with the Echo instance
+        e.Use(apperrs.CustomErrorMiddleware)
+
+        // Create the handler with a stub that always returns an internal server error
+        stubService := StubService{Err: apperrs.NewInternalServerError("Internal Server Error")}
+        h := NewHandler(&stubService)
+
+        // Wrap the handler with the middleware
+        handlerWithMiddleware := apperrs.CustomErrorMiddleware(h.WalletHandler)
+
+        action  
+                consider use middleware for catch err ?  
+		        unit test difficult	
+
+2. env variable  powershell cannot read 
+		sol_n  have $env:
+		    $env:POSTGRES_HOST="192.168.7.161"
+	
+3. ident config go-ci.yml wrong 
+	    sol_n  install plugin 
+	
+
+4  docker-compose up  error message  /tmp/salj;dfx[random]  not found   
+		 remove docker install with snap
+		 install new docker with tar 

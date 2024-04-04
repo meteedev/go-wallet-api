@@ -217,7 +217,7 @@ func (s WalletService) UpdateWalletByWalletId(walletId int, request *WalletReque
 
 	if updateRow == 0 {
 		log.Println("update affected ", updateRow)
-		return nil, apperrs.NewUnprocessableEntity("Delete wallet failed")
+		return nil, apperrs.NewUnprocessableEntity("Update wallet failed")
 	}
 
 	w, err := s.WalletStore.FindByWalletId(walletId)
