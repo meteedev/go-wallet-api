@@ -1,0 +1,15 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "192.168.7.161",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "wallet",
+            "group": "lab",
+            "database": "wallet",
+            "username": "root",
+            "password": "password"
+        }
+    ]
+}

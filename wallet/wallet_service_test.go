@@ -230,7 +230,6 @@ func TestUpdateWalletByWalletId(t *testing.T) {
 
     // Create a mock instance
     mockStore := new(MockWalletStore)
-    mockStore.On("CountByCriteria", mock.AnythingOfType("postgres.Wallet")).Return(0, nil)
     mockStore.On("UpdateByWalletId", walletID, mock.AnythingOfType("postgres.Wallet")).Return(int64(1), nil)
     mockStore.On("FindByWalletId", walletID).Return(testWallet, nil)
 

@@ -118,7 +118,7 @@ func (p *Postgres) Create(w *Wallet) (*Wallet, error) {
 		w.UserName,
 		w.WalletName, w.WalletType,
 		w.Balance)
-
+		
 	err := row.Scan(&w.ID)
 	if err != nil {
 		return nil, err
@@ -210,37 +210,50 @@ func (p *Postgres) FindByWalletId(walletID int) (*Wallet, error) {
     return &wallet, nil
 }
 
+
+
 func (p *Postgres) UpdateByWalletId(walletId int, wallet Wallet) (int64, error) {
     var updates []string
     var args []interface{}
 
-    val := reflect.ValueOf(wallet)
-    typ := reflect.TypeOf(wallet)
-
-    for i := 0; i < val.NumField(); i++ {
-        field := val.Field(i)
-        tag := typ.Field(i).Tag.Get("postgres")
-
-        if field.IsZero() || !field.CanInterface() {
-            continue
-        }
-
-        updates = append(updates, fmt.Sprintf("%s = $%d", tag, len(args)+1))
-        args = append(args, field.Interface())
+    // Check each field individually and add to the update statement if it's non-zero
+    if wallet.UserID != 0 {
+        updates = append(updates, fmt.Sprintf("user_id = $%d", len(args)+1))
+        args = append(args, wallet.UserID)
     }
 
-    // Check if any updates are provided
-    if len(updates) == 0 {
-        return 0, fmt.Errorf("no updates provided")
+    if wallet.UserName != "" {
+        updates = append(updates, fmt.Sprintf("user_name = $%d", len(args)+1))
+        args = append(args, wallet.UserName)
+    }
+
+    if wallet.WalletName != "" {
+        updates = append(updates, fmt.Sprintf("wallet_name = $%d", len(args)+1))
+        args = append(args, wallet.WalletName)
+    }
+
+    if wallet.WalletType != "" {
+        updates = append(updates, fmt.Sprintf("wallet_type = $%d", len(args)+1))
+        args = append(args, wallet.WalletType)
+    }
+
+    if wallet.Balance >= 0 {
+        updates = append(updates, fmt.Sprintf("balance = $%d", len(args)+1))
+        args = append(args, wallet.Balance)
     }
 
     // Construct the query string
-    query := fmt.Sprintf("UPDATE user_wallet SET %s WHERE id = $%d", strings.Join(updates, ", "), len(args)+1)
+    query := fmt.Sprintf("UPDATE %s SET %s WHERE id = $%d", "user_wallet", 
+                         strings.Join(updates, ", "), len(args)+1)
     args = append(args, walletId)
 
-    // Execute the query
+	// fmt.Println(query)
+	// fmt.Println(args)
+	
+	// Execute the query
     res, err := p.Db.Exec(query, args...)
-    if err != nil {
+    
+	if err != nil {
         return 0, err
     }
 
@@ -251,4 +264,5 @@ func (p *Postgres) UpdateByWalletId(walletId int, wallet Wallet) (int64, error) 
     }
 
     return numRows, nil
+
 }

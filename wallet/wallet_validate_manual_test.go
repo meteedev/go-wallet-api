@@ -131,7 +131,7 @@ func TestValidateWalletRequest(t *testing.T) {
 }
 
 func validateWalletRequestTest(t *testing.T, wallet *WalletRequest, wantError bool) {
-    err := ValidateWalletRequest(wallet)
+    err := ValidateWalletRequestCreate(wallet)
     if (err != nil) != wantError {
         t.Errorf("ValidateWalletRequest(%v) returned error: %v, wantError: %t", wallet, err, wantError)
     }

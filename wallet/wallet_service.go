@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"log"
-	"fmt"
 
 	"github.com/KKGo-Software-engineering/fun-exercise-api/apperrs"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/postgres"
@@ -105,7 +104,7 @@ func (s WalletService) GetWalletsByUserId(userId int) ([]Wallet, error) {
 
 func (s WalletService) CreateWallet(request *WalletRequest) (*Wallet, error) {
 
-	err := ValidateWalletRequest(request)
+	err := ValidateWalletRequestCreate(request)
 
 	if err != nil {
 		log.Println(err)
@@ -193,7 +192,7 @@ func (s WalletService) DeleteWalletByUserId(userId string) (int64, error) {
 
 func (s WalletService) UpdateWalletByWalletId(walletId int, request *WalletRequest) (*Wallet, error) {
 
-	err := ValidateWalletRequest(request)
+	err := ValidateWalletRequestUpdate(request)
 
 	if err != nil {
 		log.Println(err)
@@ -206,19 +205,6 @@ func (s WalletService) UpdateWalletByWalletId(walletId int, request *WalletReque
 		WalletName: request.WalletName,
 		WalletType: request.WalletType,
 		Balance:    request.Balance,
-	}
-
-	isDuplicated, err := s.CheckDuplicated(wallet)
-
-	if err != nil {
-		log.Println(err)
-		return nil, apperrs.NewInternalServerError(err.Error())
-	}
-
-	if isDuplicated {
-		errMsg := fmt.Sprintf(" Update wallet failed :exist wallet userid=%d userName=%s walletname=%s walletType=%s", wallet.UserID, wallet.UserName, wallet.WalletName, wallet.WalletType)
-		log.Println(errMsg)
-		return nil, apperrs.NewInternalServerError(errMsg)
 	}
 
 
