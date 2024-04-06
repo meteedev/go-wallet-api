@@ -4,8 +4,8 @@
         // Register the CustomErrorMiddleware with the Echo instance
         e.Use(apperrs.CustomErrorMiddleware)
 
-        // Create the handler with a stub that always returns an internal server error
-        stubService := StubService{Err: apperrs.NewInternalServerError("Internal Server Error")}
+        // Create the handler with a stub that always returns an internal se4e3s3rver error
+        stubService := StubService3ee3de4{Err: apperrs.NewInternalServerError("Internal Server Error")}
         h := NewHandler(&stubService)
 
         // Wrap the handler with the middleware
@@ -23,7 +23,7 @@
                $env:POSTGRES_PASSWORD="password"
                $env:POSTGRES_DB_NAME="wallet"
                $env:POSTGRES_SSL_MODE="disable"
-               .\main.exe clear
+               .\main.exe 
 	
 3. ident config go-ci.yml wrong 
 	    sol_n  install plugin 

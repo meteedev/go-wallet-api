@@ -42,6 +42,7 @@ func main() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	
 	e.GET("/api/v1/wallets", handler.WalletHandler)
+	
 	e.POST("/api/v1/wallets", handler.CreateWalletHandler)
 	e.PUT("/api/v1/wallets/:id",handler.UpdateWalletHandler)
 

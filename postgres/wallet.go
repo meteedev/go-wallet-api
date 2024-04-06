@@ -44,7 +44,15 @@ type Postgres struct {
 }
 
 func (p *Postgres) FindByWalletType(walletType string) ([]Wallet, error) {
-	rows, err := p.Db.Query("SELECT * FROM user_wallet WHERE wallet_type = $1", walletType)
+	
+	stmt , err := p.Db.Prepare("SELECT * FROM user_wallet WHERE wallet_type = $1")
+	
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	
+	rows, err := stmt.Query(walletType)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +98,15 @@ func (p *Postgres) FindAll() ([]Wallet, error) {
 }
 
 func (p *Postgres) FindByUserId(userId int) ([]Wallet, error) {
-	rows, err := p.Db.Query("SELECT * FROM user_wallet WHERE user_id = $1", userId)
+	
+	stmt , err := p.Db.Prepare("SELECT * FROM user_wallet WHERE user_id = $1")
+	
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +180,18 @@ func (p *Postgres) CountByCriteria(criteria Wallet) (int, error) {
 func (p *Postgres) DeleteByUserId(userId string) (int64, error) {
 
 	sql := "DELETE FROM user_wallet WHERE user_id= $1"
-	res, err := p.Db.Exec(sql, userId)
+	
+	stmt , err := p.Db.Prepare(sql)
+	
+	
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(sql,userId)
+	
+	//Exec(sql, userId)
 
 	if err != nil {
 		return 0, err
@@ -189,14 +216,21 @@ func (p *Postgres) FindByWalletId(walletID int) (*Wallet, error) {
         LIMIT 1
     `
 
+	stmt , err :=  p.Db.Prepare(query)
+
+	if err !=nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
     // Execute the query using the QueryRow method of the DB object
-    row := p.Db.QueryRow(query, walletID)
+    row := stmt.QueryRow(query, walletID)
 
     // Initialize a Wallet struct
     var wallet Wallet
 
     // Scan the values returned by the query into the fields of the wallet struct
-    err := row.Scan(&wallet.ID, &wallet.UserID, &wallet.UserName, &wallet.WalletName, &wallet.WalletType, &wallet.Balance, &wallet.CreatedAt)
+    err = row.Scan(&wallet.ID, &wallet.UserID, &wallet.UserName, &wallet.WalletName, &wallet.WalletType, &wallet.Balance, &wallet.CreatedAt)
     if err != nil {
         // If no rows are returned, check for sql.ErrNoRows error
         if err == sql.ErrNoRows {
@@ -247,9 +281,11 @@ func (p *Postgres) UpdateByWalletId(walletId int, wallet Wallet) (int64, error) 
                          strings.Join(updates, ", "), len(args)+1)
     args = append(args, walletId)
 
-	// fmt.Println(query)
+	// fmt.Println(query) 
 	// fmt.Println(args)
 	
+	//p.Db.Prepare
+
 	// Execute the query
     res, err := p.Db.Exec(query, args...)
     
